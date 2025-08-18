@@ -3,6 +3,8 @@ server:
   servlet:
     context-path: /api/v1
 spring:
+  liquibase:
+    enabled: false
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/thunder_db

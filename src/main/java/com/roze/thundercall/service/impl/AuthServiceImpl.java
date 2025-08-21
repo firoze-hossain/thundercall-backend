@@ -43,8 +43,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + request.username()));
+        User user = userRepository.findByUsernameOrEmail(request.usernameOrEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + request.usernameOrEmail()));
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AuthException("Invalid credentials");
         }

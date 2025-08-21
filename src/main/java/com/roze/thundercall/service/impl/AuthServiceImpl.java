@@ -1,8 +1,10 @@
 package com.roze.thundercall.service.impl;
 
 import com.roze.thundercall.dto.AuthResponse;
+import com.roze.thundercall.dto.LoginRequest;
 import com.roze.thundercall.dto.RegisterRequest;
 import com.roze.thundercall.entity.User;
+import com.roze.thundercall.exception.AuthException;
 import com.roze.thundercall.exception.ResourceExistException;
 import com.roze.thundercall.mapper.UserMapper;
 import com.roze.thundercall.repository.UserRepository;
@@ -10,6 +12,7 @@ import com.roze.thundercall.security.JwtTokenProvider;
 import com.roze.thundercall.security.RefreshTokenService;
 import com.roze.thundercall.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +36,21 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.password()));
         userRepository.save(user);
+        String token = jwtTokenProvider.generateToken(user);
+        String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
+        return userMapper.toResponse(user, token, refreshToken);
+    }
+
+    @Override
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + request.username()));
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new AuthException("Invalid credentials");
+        }
+        if (!user.getEnabled()) {
+            throw new AuthException("User account is disabled");
+        }
         String token = jwtTokenProvider.generateToken(user);
         String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
         return userMapper.toResponse(user, token, refreshToken);

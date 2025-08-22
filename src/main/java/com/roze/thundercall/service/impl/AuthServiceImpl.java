@@ -3,6 +3,7 @@ package com.roze.thundercall.service.impl;
 import com.roze.thundercall.dto.AuthResponse;
 import com.roze.thundercall.dto.LoginRequest;
 import com.roze.thundercall.dto.RegisterRequest;
+import com.roze.thundercall.entity.RefreshToken;
 import com.roze.thundercall.entity.User;
 import com.roze.thundercall.exception.AuthException;
 import com.roze.thundercall.exception.ResourceExistException;
@@ -54,5 +55,22 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtTokenProvider.generateToken(user);
         String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
         return userMapper.toResponse(user, token, refreshToken);
+    }
+
+    @Override
+    public AuthResponse refreshToken(String refreshToken) {
+        return refreshTokenService.findByToken(refreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtTokenProvider.generateToken(user);
+                    return userMapper.toResponse(user, token, refreshToken);
+
+                }).orElseThrow(() -> new AuthException("Invalid Refresh Token"));
+    }
+
+    @Override
+    public void logout(String token) {
+        refreshTokenService.deleteByToken(token);
     }
 }

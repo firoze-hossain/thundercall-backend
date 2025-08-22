@@ -1,6 +1,7 @@
 package com.roze.thundercall.security;
 
 import com.roze.thundercall.entity.RefreshToken;
+import com.roze.thundercall.exception.AuthException;
 import com.roze.thundercall.repository.RefreshTokenRepository;
 import com.roze.thundercall.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +35,19 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
+    public Optional<RefreshToken> findByToken(String token) {
+        return refreshTokenRepository.findByToken(token);
+    }
+
+    public RefreshToken verifyExpiration(RefreshToken token) {
+        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+            refreshTokenRepository.delete(token);
+            throw new AuthException("Refresh Token has expired");
+        }
+        return token;
+    }
+
+    public void deleteByToken(String token) {
+        refreshTokenRepository.findByToken(token).ifPresent(refresh -> refreshTokenRepository.delete(refresh));
+    }
 }

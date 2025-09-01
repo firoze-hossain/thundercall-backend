@@ -12,19 +12,19 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ApiResponse<T> {
+public class BaseResponse<T> {
     private Boolean success;
     private String message;
     private T data;
     private Instant timestamp;
     private Integer statusCode;
 
-    public static <T> ApiResponse<T> success(T data) {
+    public static <T> BaseResponse<T> success(T data) {
         return success(data, "Operation Completed Successfully");
     }
 
-    public static <T> ApiResponse<T> success(T data, String message) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> success(T data, String message) {
+        return BaseResponse.<T>builder()
                 .success(true)
                 .data(data)
                 .message(message)
@@ -33,12 +33,12 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> created(T data) {
+    public static <T> BaseResponse<T> created(T data) {
         return created(data, "Resource Created SuccessFully");
     }
 
-    public static <T> ApiResponse<T> created(T data, String message) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> created(T data, String message) {
+        return BaseResponse.<T>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .message(message)
                 .data(data)
@@ -48,12 +48,12 @@ public class ApiResponse<T> {
 
     }
 
-    public static ApiResponse<Void> noContent() {
+    public static BaseResponse<Void> noContent() {
         return noContent("No Content Available");
     }
 
-    public static ApiResponse<Void> noContent(String message) {
-        return ApiResponse.<Void>builder()
+    public static BaseResponse<Void> noContent(String message) {
+        return BaseResponse.<Void>builder()
                 .success(true)
                 .message(message)
                 .timestamp(Instant.now())
@@ -62,8 +62,8 @@ public class ApiResponse<T> {
 
     }
 
-    public static ApiResponse<Void> error(String message, HttpStatus status) {
-        return ApiResponse.<Void>builder()
+    public static BaseResponse<Void> error(String message, HttpStatus status) {
+        return BaseResponse.<Void>builder()
                 .success(false)
                 .message(message)
                 .timestamp(Instant.now())
@@ -71,8 +71,8 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(String message, HttpStatus status, T data) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> error(String message, HttpStatus status, T data) {
+        return BaseResponse.<T>builder()
                 .success(false)
                 .statusCode(status.value())
                 .message(message)

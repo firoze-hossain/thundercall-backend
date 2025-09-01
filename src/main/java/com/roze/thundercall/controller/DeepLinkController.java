@@ -1,7 +1,7 @@
 package com.roze.thundercall.controller;
 
 import com.roze.thundercall.security.JwtTokenProvider;
-import com.roze.thundercall.utils.ApiResponse;
+import com.roze.thundercall.utils.BaseResponse;
 import com.roze.thundercall.utils.BaseController;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ public class DeepLinkController extends BaseController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/auth")
-    public ResponseEntity<ApiResponse<Void>> handleDeepLink(@RequestParam String token,
-                                                            @RequestParam(required = false) String platform,
-                                                            HttpServletResponse response) throws IOException {
+    public ResponseEntity<BaseResponse<Void>> handleDeepLink(@RequestParam String token,
+                                                             @RequestParam(required = false) String platform,
+                                                             HttpServletResponse response) throws IOException {
         if (!jwtTokenProvider.validateToken(token)) {
             return error("Token not valid", HttpStatus.UNAUTHORIZED);
         }

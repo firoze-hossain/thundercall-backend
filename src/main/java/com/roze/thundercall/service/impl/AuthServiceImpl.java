@@ -7,12 +7,14 @@ import com.roze.thundercall.entity.RefreshToken;
 import com.roze.thundercall.entity.User;
 import com.roze.thundercall.exception.AuthException;
 import com.roze.thundercall.exception.ResourceExistException;
+import com.roze.thundercall.exception.ResourceNotFoundException;
 import com.roze.thundercall.mapper.UserMapper;
 import com.roze.thundercall.repository.UserRepository;
 import com.roze.thundercall.security.JwtTokenProvider;
 import com.roze.thundercall.security.RefreshTokenService;
 import com.roze.thundercall.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,5 +74,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(String token) {
         refreshTokenService.deleteByToken(token);
+    }
+
+    @Override
+    public User getUserFromAuthentication(Authentication authentication) {
+        String username = ((org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal()).getUsername();
+        return userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

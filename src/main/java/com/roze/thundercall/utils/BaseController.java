@@ -4,41 +4,41 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class BaseController {
-    protected <T> ResponseEntity<ApiResponse<T>> ok(T data) {
-        return ResponseEntity.ok(ApiResponse.success(data));
+    protected <T> ResponseEntity<BaseResponse<T>> ok(T data) {
+        return ResponseEntity.ok(BaseResponse.success(data));
     }
 
-    protected <T> ResponseEntity<ApiResponse<T>> ok(T data, String message) {
-        return ResponseEntity.ok(ApiResponse.success(data, message));
+    protected <T> ResponseEntity<BaseResponse<T>> ok(T data, String message) {
+        return ResponseEntity.ok(BaseResponse.success(data, message));
     }
 
-    protected <T> ResponseEntity<ApiResponse<T>> created(T data) {
+    protected <T> ResponseEntity<BaseResponse<T>> created(T data) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created(data));
+                .body(BaseResponse.created(data));
     }
 
-    protected <T> ResponseEntity<ApiResponse<T>> created(T data, String message) {
+    protected <T> ResponseEntity<BaseResponse<T>> created(T data, String message) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created(data, message));
+                .body(BaseResponse.created(data, message));
     }
 
-    protected ResponseEntity<ApiResponse<Void>> noContent() {
+    protected ResponseEntity<BaseResponse<Void>> noContent() {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.noContent());
+                .body(BaseResponse.noContent());
     }
 
-    protected ResponseEntity<ApiResponse<Void>> noContent(String message) {
+    protected ResponseEntity<BaseResponse<Void>> noContent(String message) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.noContent(message));
+                .body(BaseResponse.noContent(message));
     }
 
-    protected ResponseEntity<ApiResponse<Void>> error(String message, HttpStatus status) {
+    protected ResponseEntity<BaseResponse<Void>> error(String message, HttpStatus status) {
         return ResponseEntity.status(status)
-                .body(ApiResponse.error(message, status));
+                .body(BaseResponse.error(message, status));
     }
 
-    protected <T> ResponseEntity<ApiResponse<T>> error(String message, HttpStatus status, T data) {
+    protected <T> ResponseEntity<BaseResponse<T>> error(String message, HttpStatus status, T data) {
         return ResponseEntity.status(status)
-                .body(ApiResponse.error(message, status, data));
+                .body(BaseResponse.error(message, status, data));
     }
 }

@@ -4,10 +4,10 @@ import com.roze.thundercall.dto.OnboardingStep;
 import com.roze.thundercall.dto.WorkspaceResponse;
 import com.roze.thundercall.dto.WorkspaceSetupRequest;
 import com.roze.thundercall.entity.User;
-import com.roze.thundercall.repository.UserRepository;
+import com.roze.thundercall.service.AuthService;
 import com.roze.thundercall.service.WorkspaceService;
-import com.roze.thundercall.utils.ApiResponse;
 import com.roze.thundercall.utils.BaseController;
+import com.roze.thundercall.utils.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,70 +21,46 @@ import java.util.List;
 @RequestMapping("/workspaces")
 public class WorkspaceController extends BaseController {
     private final WorkspaceService workspaceService;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
     @PostMapping("/setup")
-    public ResponseEntity<ApiResponse<WorkspaceResponse>> setupWorkspace(@Valid @RequestBody WorkspaceSetupRequest request, Authentication authentication) {
-        String username = ((org.springframework.security.core.userdetails.UserDetails)
-                authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<BaseResponse<WorkspaceResponse>> setupWorkspace(@Valid @RequestBody WorkspaceSetupRequest request, Authentication authentication) {
+        User user = authService.getUserFromAuthentication(authentication);
         WorkspaceResponse response = workspaceService.setupInitialWorkspace(user, request);
         return created(response, "Workspace created successfully");
     }
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<WorkspaceResponse>>> getUserWorkspaces(Authentication authentication) {
-        String username = ((org.springframework.security.core.userdetails.UserDetails)
-                authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<BaseResponse<List<WorkspaceResponse>>> getUserWorkspaces(Authentication authentication) {
+        User user = authService.getUserFromAuthentication(authentication);
         List<WorkspaceResponse> workspaceResponses = workspaceService.getUserWorkspaces(user);
         return ok(workspaceResponses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<WorkspaceResponse>> getWorkspace(@PathVariable Long id, Authentication authentication) {
-        String username = ((org.springframework.security.core.userdetails.UserDetails)
-                authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<BaseResponse<WorkspaceResponse>> getWorkspace(@PathVariable Long id, Authentication authentication) {
+        User user = authService.getUserFromAuthentication(authentication);
         WorkspaceResponse response = workspaceService.getWorkspaceById(id, user);
         return ok(response);
     }
 
     @GetMapping("/tutorial/status")
-    public ResponseEntity<ApiResponse<Boolean>> getTutorialStatus(Authentication authentication) {
-        String username = ((org.springframework.security.core.userdetails.UserDetails)
-                authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<BaseResponse<Boolean>> getTutorialStatus(Authentication authentication) {
+        User user = authService.getUserFromAuthentication(authentication);
         boolean completed = workspaceService.hasCompletedOnboarding(user);
         return ok(completed);
     }
 
     @PostMapping("/tutorial/complete")
-    public ResponseEntity<ApiResponse<Void>> markTutorialComplete(@RequestParam String stepId, Authentication authentication) {
-        String username = ((org.springframework.security.core.userdetails.UserDetails)
-                authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<BaseResponse<Void>> markTutorialComplete(@RequestParam String stepId, Authentication authentication) {
+        User user = authService.getUserFromAuthentication(authentication);
         workspaceService.markTutorialComplete(user, stepId);
         return noContent("Tutorial step completed");
     }
 
     @GetMapping("/tutorial/steps")
-    public ResponseEntity<ApiResponse<List<OnboardingStep>>> getOnboardingSteps(Authentication authentication) {
-        String username = ((org.springframework.security.core.userdetails.UserDetails)
-                authentication.getPrincipal()).getUsername();
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<BaseResponse<List<OnboardingStep>>> getOnboardingSteps(Authentication authentication) {
+        User user = authService.getUserFromAuthentication(authentication);
         List<OnboardingStep> steps = workspaceService.getOnboardingSteps(user);
         return ok(steps);
     }

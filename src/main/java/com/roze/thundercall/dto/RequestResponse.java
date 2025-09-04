@@ -22,6 +22,8 @@ public class RequestResponse {
     private String body;
     private Long collectionId;
     private String collectionName;
+    private Long folderId;
+    private String folderName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

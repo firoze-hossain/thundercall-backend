@@ -3,14 +3,12 @@ package com.roze.thundercall.service.impl;
 import com.roze.thundercall.dto.ApiRequest;
 import com.roze.thundercall.dto.ApiResponse;
 import com.roze.thundercall.dto.RequestResponse;
-import com.roze.thundercall.entity.Collection;
-import com.roze.thundercall.entity.Request;
-import com.roze.thundercall.entity.RequestHistory;
-import com.roze.thundercall.entity.User;
+import com.roze.thundercall.entity.*;
 import com.roze.thundercall.enums.HttpMethod;
 import com.roze.thundercall.exception.ResourceNotFoundException;
 import com.roze.thundercall.mapper.RequestMapper;
 import com.roze.thundercall.repository.CollectionRepository;
+import com.roze.thundercall.repository.FolderRepository;
 import com.roze.thundercall.repository.RequestHistoryRepository;
 import com.roze.thundercall.repository.RequestRepository;
 import com.roze.thundercall.service.RequestService;
@@ -39,6 +37,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestHistoryRepository requestHistoryRepository;
     private final CollectionRepository collectionRepository;
     private final RequestMapper requestMapper;
+    private final FolderRepository folderRepository;
 
     @Override
     @Transactional
@@ -73,6 +72,16 @@ public class RequestServiceImpl implements RequestService {
     public RequestResponse saveRequestToCollection(ApiRequest apiRequest, User user) {
         Collection collection = collectionRepository.findByIdAndWorkspaceOwner(apiRequest.collectionId(), user)
                 .orElseThrow(() -> new ResourceNotFoundException("Collection not found"));
+        // Validate folder ownership if folderId is provided
+        if (apiRequest.folderId() != null) {
+            Folder folder = folderRepository.findByIdAndCollectionWorkspaceOwner(apiRequest.folderId(), user)
+                    .orElseThrow(() -> new ResourceNotFoundException("Folder not found or you don't have access"));
+
+            // Verify folder belongs to the same collection
+            if (!folder.getCollection().getId().equals(collection.getId())) {
+                throw new IllegalArgumentException("Folder does not belong to the specified collection");
+            }
+        }
         Request request = requestMapper.toEntity(apiRequest);
         request.setCollection(collection);
         Request savedRequest = requestRepository.save(request);

@@ -11,6 +11,7 @@ public record ApiRequest(
         @NotBlank String url,
         String headers,
         String body,
-        Long collectionId
+        Long collectionId,
+        Long folderId
 ) {
 }
